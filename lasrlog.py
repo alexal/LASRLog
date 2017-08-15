@@ -3,9 +3,9 @@ import datetime
 import io
 import operator
 import os
+import platform
 import sys
 import textwrap
-import time
 from functools import reduce
 from texttable import Texttable, get_color_string, bcolors
 
@@ -44,7 +44,9 @@ parser.add_argument("-r", "--reverse", type=_str_to_bool,
                     default=True, help="This is using to flag descending sorts (boolean value), by default True.")
 parser.add_argument("-g", "--greaterthan", type=float, default=0,
                     help="Print actions with run time greater or equals specified value")
+parser.add_argument("-coloring", "--coloring", type=_str_to_bool, default=False, help="")
 args = parser.parse_args()
+
 
 class LASRAction(object):
     def __init__(self):
@@ -125,6 +127,17 @@ class Log(object):
 
 
 def main():
+    is_lin = False
+    is_mac = False
+    is_win = False
+
+    if platform.system() == 'Linux':
+        is_lin = True
+    elif platform.system() == 'Darwin':
+        is_mac = True
+    elif platform.system() == 'Windows':
+        is_win = True
+
     parsing_start_time = time.time()
     log = Log()
     log.get_entries()
@@ -139,7 +152,23 @@ def main():
     table.set_cols_dtype(['i', 't', 't', 't', 't', 'f', 'i', 'i'])
     table.header(['ID', 'Time', 'User', 'Raw Cmd', 'Table Name', 'Run time', 'Start Line', 'Total Lines'])
     for a in log.actions[:args.howmany]:
-        table.add_row([a.id, a.time, a.user, a.rawcmd, a.tablename, a.runtime, a.startline, a.totallines])
+        runtime = None
+
+        if is_lin or is_mac or args.coloring:
+            if in_range(0, 15, a.runtime):
+                runtime = get_color_string(bcolors.GREEN, a.runtime)
+            elif in_range(16, 30, a.runtime):
+                runtime = get_color_string(bcolors.LIGHT_YELLOW, a.runtime)
+            elif in_range(31, 60, a.runtime):
+                runtime = get_color_string(bcolors.YELLOW, a.runtime)
+            elif in_range(61, 2147483647, a.runtime):
+                runtime = get_color_string(bcolors.RED, a.runtime)
+            else:
+                runtime = a.runtime
+
+            table.add_row([a.id, a.time, a.user, a.rawcmd, a.tablename, runtime, a.startline, a.totallines])
+        else:
+            table.add_row([a.id, a.time, a.user, a.rawcmd, a.tablename, a.runtime, a.startline, a.totallines])
 
     print(table.draw())
     print("\nParse time:", "{0:.3f}".format(parsing_end_time - parsing_start_time))
