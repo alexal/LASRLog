@@ -1,5 +1,5 @@
 # Overview
-The LASRLog.py utility provides information about LASR actions with high run time
+The LASRLog.py utility provides information about LASR actions with a high run time
 
 # Prerequisites
 
@@ -8,7 +8,7 @@ The LASRLog.py utility provides information about LASR actions with high run tim
 
 # Usage
 
-python3.5 lasrlog.py /Users/allyse/Downloads/LASR.1332805759.98431.saslasr.log 20
+python3.5 lasrlog.py /Users/alexal/Downloads/LASR.1332805759.98431.saslasr.log 20
 
 # Screenshot
 
